@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chiron Clinical Workspace Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" aria-label="Chiron clinical workspace prototype">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">C</div>
+          <div>
+            <div class="eyebrow">Chiron Medical Technology</div>
+            <h1>Clinical Workspace</h1>
+          </div>
+        </div>
+        <div class="case-strip" aria-label="Synthetic case summary">
+          <span>Synthetic case</span>
+          <strong>52F</strong>
+          <span>persistent fatigue + exertional dyspnea</span>
+          <span class="dot"></span>
+          <span>Advisory pilot</span>
+        </div>
+        <button class="ghost-button" id="reportButton" type="button">Case Report</button>
+      </header>
+
+      <section class="advisory-banner" aria-label="Pilot mode advisory">
+        <strong>Advisory mode</strong>
+        <span>No physician sign-off, diagnosis recording, or order-entry workflow in this prototype. The surfaces update in place as coded actions are selected.</span>
+      </section>
+
+      <section class="workspace" id="workspace" aria-label="Three panel workspace">
+        <aside class="panel qa-panel" id="qaPanel" aria-label="Conversation and question panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Conversation / Q&amp;A</p>
+              <h2>Next Best Question</h2>
+            </div>
+            <button class="icon-button" id="whyButton" type="button" title="Explain why this question is next">?</button>
+          </div>
+
+          <button class="context-toggle" id="contextToggle" type="button" aria-expanded="true">
+            <span>Case Context</span>
+            <span id="contextChevron">Collapse</span>
+          </button>
+          <div class="case-context" id="caseContext">
+            <dl>
+              <div>
+                <dt>Presenting pattern</dt>
+                <dd>Six weeks of fatigue, exertional shortness of breath, and intermittent lightheadedness.</dd>
+              </div>
+              <div>
+                <dt>Known findings</dt>
+                <dd>Normal temperature, no productive cough, pulse 96, synthetic outpatient intake.</dd>
+              </div>
+              <div>
+                <dt>Safety overlay</dt>
+                <dd>No critical red flag currently active; exceptions remain visible if triggered.</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="question-card">
+            <div class="question-meta">
+              <span id="questionCounter">Question 1 of 4</span>
+              <span id="questionPurpose">Confirm high-yield symptom cluster</span>
+            </div>
+            <h3 id="questionText">Is the shortness of breath worse with exertion than at rest?</h3>
+            <p id="questionRationale">Appendix G frames Q&amp;A as the surface for the single most useful thing to confirm or examine next.</p>
+            <div class="answer-grid" role="group" aria-label="Answer current question">
+              <button class="answer-button" data-answer="yes" type="button">Yes</button>
+              <button class="answer-button" data-answer="no" type="button">No</button>
+              <button class="answer-button" data-answer="unknown" type="button">Not sure</button>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <div class="timeline-header">
+              <span>Coded answers</span>
+              <button class="text-button" id="resetButton" type="button">Reset</button>
+            </div>
+            <ol id="answerLog"></ol>
+          </div>
+        </aside>
+
+        <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="Resize Q and A panel" tabindex="0"></div>
+
+        <section class="panel heatmap-panel" aria-label="Heat map differential panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Heat Map / Differential</p>
+              <h2>Ranked Differential</h2>
+            </div>
+            <div class="segmented" role="group" aria-label="Differential display mode">
+              <button class="segment active" id="conciseButton" type="button">Concise</button>
+              <button class="segment" id="matrixButton" type="button">Matrix</button>
+            </div>
+          </div>
+
+          <div class="heatmap-note">
+            <span id="engineState">Initial state: ranked from intake findings.</span>
+            <button class="text-button" id="exceptionsButton" type="button">Exceptions</button>
+          </div>
+
+          <div class="disease-list" id="diseaseList"></div>
+          <div class="matrix-view hidden" id="matrixView" aria-label="Symptom disease matrix"></div>
+
+          <div class="path-detail" id="pathDetail">
+            <div>
+              <p class="panel-kicker">YBR / Path</p>
+              <h3 id="pathTitle">Select a disease row</h3>
+            </div>
+            <p id="pathCopy">The path view stays on demand: confirmation gate, endotype branch, and next step are shown without changing the three-panel layout.</p>
+          </div>
+        </section>
+
+        <aside class="panel joint-panel" aria-label="Joint Action and pending results panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Joint Action</p>
+              <h2>Active Threads</h2>
+            </div>
+            <span class="status-pill" id="threadCount">0 active</span>
+          </div>
+
+          <div class="joint-action-list" id="jointActionList">
+            <div class="empty-state">
+              Diseases promoted past threshold appear here. Promotion is visible but not manually operated.
+            </div>
+          </div>
+
+          <section class="pending-results" aria-label="Pending Results">
+            <div class="pending-header">
+              <div>
+                <p class="panel-kicker">Pending Results</p>
+                <h3>Tracked Workup</h3>
+              </div>
+              <span class="status-pill amber" id="pendingCount">0 pending</span>
+            </div>
+            <div id="pendingList" class="pending-list">
+              <div class="empty-state compact">No pending items yet.</div>
+            </div>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <dialog class="modal" id="modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 id="modalTitle">Explain</h2>
+          <button class="icon-button" id="modalClose" type="button" title="Close">×</button>
+        </div>
+        <div id="modalBody" class="modal-body"></div>
+      </div>
+    </dialog>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
