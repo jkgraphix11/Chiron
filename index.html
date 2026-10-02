@@ -83,6 +83,24 @@
             </div>
             <ol id="answerLog"></ol>
           </div>
+
+          <form class="symptom-composer" id="symptomForm" aria-label="Add symptom">
+            <div class="composer-label">
+              <span>Add symptom</span>
+              <span id="symptomCount">0 added</span>
+            </div>
+            <div class="composer-input-row">
+              <input
+                id="symptomInput"
+                type="text"
+                autocomplete="off"
+                placeholder="Type symptom or finding..."
+                aria-label="Symptom or finding"
+              />
+              <button class="send-button" type="submit" title="Add symptom">+</button>
+            </div>
+            <div class="symptom-chips" id="symptomChips" aria-label="Added symptoms"></div>
+          </form>
         </aside>
 
         <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="Resize Q and A panel" tabindex="0"></div>
@@ -93,9 +111,15 @@
               <p class="panel-kicker">Heat Map / Differential</p>
               <h2>Ranked Differential</h2>
             </div>
-            <div class="segmented" role="group" aria-label="Differential display mode">
-              <button class="segment active" id="conciseButton" type="button">Concise</button>
-              <button class="segment" id="matrixButton" type="button">Matrix</button>
+            <div class="heatmap-tools">
+              <div class="segmented" role="group" aria-label="Differential display mode">
+                <button class="segment active" id="conciseButton" type="button">Concise</button>
+                <button class="segment" id="matrixButton" type="button">Matrix</button>
+              </div>
+              <label class="heatmap-search" for="heatmapSearch">
+                <span>Search differential</span>
+                <input id="heatmapSearch" type="search" autocomplete="off" placeholder="Search..." />
+              </label>
             </div>
           </div>
 
