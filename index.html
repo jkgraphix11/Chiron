@@ -4,83 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chiron Clinical Workspace Prototype</title>
-    <link rel="stylesheet" href="./styles.css?v=chiron-figma-cues-e64610c" />
+    <link rel="stylesheet" href="./styles.css?v=restore-client-prototype-871bb90" />
   </head>
   <body>
     <main class="app-shell" aria-label="Chiron clinical workspace prototype">
-      <aside class="app-sidebar" aria-label="Primary navigation">
-        <div class="sidebar-logo" aria-label="Chiron Medical Technologies">
-          <div class="logo-seal" aria-hidden="true">C</div>
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">C</div>
           <div>
-            <strong>CHIRON</strong>
-            <span>Medical Technologies</span>
+            <div class="eyebrow">Chiron Medical Technology</div>
+            <h1>Clinical Workspace</h1>
           </div>
         </div>
-
-        <nav class="sidebar-nav" aria-label="Clinical sections">
-          <a href="#" class="nav-item"><span aria-hidden="true">▦</span>Dashboard</a>
-          <a href="#" class="nav-item"><span aria-hidden="true">♙</span>Patients <em>38</em></a>
-          <a href="#" class="nav-item active"><span aria-hidden="true">✚</span>Diagnosis</a>
-          <a href="#" class="nav-item"><span aria-hidden="true">☑</span>Doctor Review</a>
-        </nav>
-
-        <div class="sidebar-footer">
-          <a href="#" class="nav-item"><span aria-hidden="true">◎</span>Help &amp; support</a>
-          <a href="#" class="nav-item"><span aria-hidden="true">⚙</span>Settings</a>
-          <div class="account-card">
-            <div class="avatar" aria-hidden="true">MS</div>
-            <div>
-              <strong>Dr. Morgan Smith</strong>
-              <span>Physician reviewer</span>
-            </div>
-          </div>
+        <div class="case-strip" aria-label="Synthetic case summary">
+          <span>Synthetic case</span>
+          <strong>52F</strong>
+          <span>persistent fatigue + exertional dyspnea</span>
+          <span class="dot"></span>
+          <span>Advisory pilot</span>
         </div>
-      </aside>
+        <button class="ghost-button" id="reportButton" type="button">Case Report</button>
+      </header>
 
-      <section class="main-shell">
-        <section class="advisory-banner" aria-label="Pilot mode advisory">
-          <strong>Urgent clinical safety alert</strong>
-          <span>Progressive neurological symptoms may require immediate escalation.</span>
-          <button class="text-button" type="button">Dismiss</button>
-          <button class="text-button danger" id="exceptionsButton" type="button">View findings</button>
-        </section>
-
-        <header class="topbar">
-          <div class="patient-heading">
-            <div class="back-arrow" aria-hidden="true">‹</div>
-            <div>
-              <div class="patient-title">
-                <h1>John Smith</h1>
-                <span class="triage-badge">TRIAGE</span>
-              </div>
-              <div class="case-strip" aria-label="Synthetic case summary">
-                <span>Case No: 10482</span>
-                <span class="dot"></span>
-                <span>DOB 16 Sep 1996</span>
-                <span class="dot"></span>
-                <span>Gender: Male</span>
-              </div>
-            </div>
-          </div>
-          <label class="search-box">
-            <span aria-hidden="true">⌕</span>
-            <input type="search" placeholder="Search patients or cases..." aria-label="Search patients or cases" />
-          </label>
-          <button class="ghost-button" id="reportButton" type="button">Case Report</button>
-        </header>
+      <section class="advisory-banner" aria-label="Pilot mode advisory">
+        <strong>Advisory mode</strong>
+        <span>No physician sign-off, diagnosis recording, or order-entry workflow in this prototype. The surfaces update in place as coded actions are selected.</span>
+      </section>
 
       <section class="workspace" id="workspace" aria-label="Three panel workspace">
         <aside class="panel qa-panel" id="qaPanel" aria-label="Conversation and question panel">
           <div class="panel-header">
             <div>
-              <p class="panel-kicker">Intake Summary</p>
-              <h2>Clinical Assistant</h2>
+              <p class="panel-kicker">Conversation / Q&amp;A</p>
+              <h2>Next Best Question</h2>
             </div>
             <button class="icon-button" id="whyButton" type="button" title="Explain why this question is next">?</button>
           </div>
 
           <button class="context-toggle" id="contextToggle" type="button" aria-expanded="true">
-            <span>Intake Summary</span>
+            <span>Case Context</span>
             <span id="contextChevron">Collapse</span>
           </button>
           <div class="case-context" id="caseContext">
@@ -103,7 +65,7 @@
           <div class="question-card">
             <div class="question-meta">
               <span id="questionCounter">Question 1 of 4</span>
-              <span id="questionPurpose">Current Question</span>
+              <span id="questionPurpose">Confirm high-yield symptom cluster</span>
             </div>
             <h3 id="questionText">Is the shortness of breath worse with exertion than at rest?</h3>
             <p id="questionRationale">Appendix G frames Q&amp;A as the surface for the single most useful thing to confirm or examine next.</p>
@@ -128,22 +90,18 @@
         <section class="panel heatmap-panel" aria-label="Heat map differential panel">
           <div class="panel-header">
             <div>
-              <p class="panel-kicker">Diagnosis Workspace</p>
-              <h2>Heatmap</h2>
+              <p class="panel-kicker">Heat Map / Differential</p>
+              <h2>Ranked Differential</h2>
             </div>
             <div class="segmented" role="group" aria-label="Differential display mode">
-              <button class="segment active" id="conciseButton" type="button">Heatmap</button>
+              <button class="segment active" id="conciseButton" type="button">Concise</button>
               <button class="segment" id="matrixButton" type="button">Matrix</button>
             </div>
           </div>
 
           <div class="heatmap-note">
             <span id="engineState">Initial state: ranked from intake findings.</span>
-            <div class="toggle-strip" aria-label="Heatmap filters">
-              <span>All equal</span>
-              <span>Active only</span>
-              <span>Risk weighted</span>
-            </div>
+            <button class="text-button" id="exceptionsButton" type="button">Exceptions</button>
           </div>
 
           <div class="disease-list" id="diseaseList"></div>
@@ -186,7 +144,6 @@
             </div>
           </section>
         </aside>
-      </section>
       </section>
     </main>
 
