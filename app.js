@@ -1,4 +1,4 @@
-const questions = [
+let questions = [
   {
     text: "Is the shortness of breath worse with exertion than at rest?",
     purpose: "Confirm high-yield symptom cluster",
@@ -28,6 +28,8 @@ const questions = [
     weights: { anemia: -2, thyroid: -1, anxiety: -2, infection: 18 },
   },
 ];
+
+const baseQuestions = structuredClone(questions);
 
 const initialDiseases = [
   {
@@ -74,6 +76,149 @@ const initialDiseases = [
     action: "Watch for red-flag overlay; no active workup without supporting findings.",
     pending: [],
   },
+  {
+    id: "asthma",
+    name: "Asthma or reactive airway disease",
+    score: 27,
+    climb: 24,
+    tier: "unlikely",
+    summary: "Dyspnea remains compatible, but wheeze and trigger pattern are not yet established.",
+    path: "Confirmation gate: episodic wheeze, nighttime symptoms, trigger exposure, response to bronchodilator.",
+    action: "Track as visible respiratory branch if wheeze or trigger history emerges.",
+    pending: [],
+  },
+  {
+    id: "heartFailure",
+    name: "Early heart failure physiology",
+    score: 25,
+    climb: 26,
+    tier: "unlikely",
+    summary: "Exertional dyspnea overlaps; edema, orthopnea, and exam support are absent so far.",
+    path: "Confirmation gate: orthopnea, edema, exertional limitation, cardiac exam, BNP/echo lens if promoted.",
+    action: "Monitor for cardiopulmonary escalation signals before active tracking.",
+    pending: ["BNP"],
+  },
+  {
+    id: "arrhythmia",
+    name: "Intermittent arrhythmia",
+    score: 24,
+    climb: 22,
+    tier: "unlikely",
+    summary: "Lightheadedness overlaps; palpitations, syncope, and episodic pattern remain unclear.",
+    path: "Confirmation gate: palpitations, syncope, exertional symptoms, rhythm documentation.",
+    action: "Keep visible as a reversible branch if new palpitations or syncope are added.",
+    pending: ["ECG"],
+  },
+  {
+    id: "vitaminB12",
+    name: "Vitamin B12 deficiency",
+    score: 23,
+    climb: 20,
+    tier: "unlikely",
+    summary: "Fatigue overlaps; neurologic symptoms or dietary risk would move this higher.",
+    path: "Confirmation gate: paresthesia, gait change, dietary risk, macrocytosis lens.",
+    action: "Hold as visible nutritional branch.",
+    pending: ["B12"],
+  },
+  {
+    id: "depression",
+    name: "Depressive physiology",
+    score: 22,
+    climb: 19,
+    tier: "unlikely",
+    summary: "Low energy overlaps but cardiopulmonary symptoms remain more explanatory.",
+    path: "Confirmation gate: mood, sleep, appetite, anhedonia, functional change.",
+    action: "Keep visible while somatic branches are evaluated.",
+    pending: [],
+  },
+  {
+    id: "sleepApnea",
+    name: "Sleep-disordered breathing",
+    score: 21,
+    climb: 18,
+    tier: "unlikely",
+    summary: "Fatigue could fit; snoring, witnessed apnea, and morning headache are not yet known.",
+    path: "Confirmation gate: snoring, apnea, morning headache, daytime somnolence.",
+    action: "Track only if added symptoms support a sleep branch.",
+    pending: [],
+  },
+  {
+    id: "autoimmune",
+    name: "Systemic inflammatory disease",
+    score: 19,
+    climb: 21,
+    tier: "unlikely",
+    summary: "Broad fatigue differential item; joint, rash, fever, or inflammatory pattern would raise concern.",
+    path: "Confirmation gate: joint swelling, rash, fever, weight loss, inflammatory markers if promoted.",
+    action: "Visible but inactive without supporting systemic features.",
+    pending: ["ESR", "CRP"],
+  },
+  {
+    id: "pulmonaryEmbolism",
+    name: "Pulmonary embolism",
+    score: 18,
+    climb: 34,
+    tier: "unlikely",
+    summary: "Kept visible because chest pain, hypoxia, or acute pleuritic symptoms would change urgency.",
+    path: "Exception-adjacent gate: acute pleuritic pain, hypoxia, unilateral leg swelling, tachycardia.",
+    action: "Escalate only if red-flag respiratory symptoms are added.",
+    pending: [],
+  },
+  {
+    id: "pregnancy",
+    name: "Pregnancy-related physiology",
+    score: 17,
+    climb: 16,
+    tier: "unlikely",
+    summary: "Potential contributor in synthetic outpatient context; needs relevant history.",
+    path: "Confirmation gate: pregnancy possibility, bleeding, gestational context, anemia overlap.",
+    action: "Keep visible as context-dependent differential item.",
+    pending: ["Pregnancy test"],
+  },
+  {
+    id: "renal",
+    name: "Renal dysfunction",
+    score: 16,
+    climb: 17,
+    tier: "unlikely",
+    summary: "Fatigue overlaps; edema, hypertension, and urinary findings are not present.",
+    path: "Confirmation gate: edema, urinary change, blood pressure, BMP/urinalysis lens.",
+    action: "Visible background branch unless symptoms change.",
+    pending: ["BMP"],
+  },
+  {
+    id: "diabetes",
+    name: "Diabetes or dysglycemia",
+    score: 15,
+    climb: 18,
+    tier: "unlikely",
+    summary: "Fatigue can overlap; polyuria, polydipsia, and weight change are not established.",
+    path: "Confirmation gate: thirst, urination, weight change, glucose/A1c lens.",
+    action: "Track if metabolic symptoms are added.",
+    pending: ["A1c"],
+  },
+  {
+    id: "medication",
+    name: "Medication or supplement effect",
+    score: 14,
+    climb: 15,
+    tier: "unlikely",
+    summary: "Always visible as a reversible cause, but no exposure is recorded yet.",
+    path: "Confirmation gate: recent medication start, dose change, supplements, sedating agents.",
+    action: "Review only if exposure symptoms or history are added.",
+    pending: [],
+  },
+  {
+    id: "deconditioning",
+    name: "Deconditioning",
+    score: 13,
+    climb: 14,
+    tier: "unlikely",
+    summary: "Could explain exertional symptoms, but fatigue and lightheadedness need higher-yield exclusions first.",
+    path: "Confirmation gate: activity change, gradual limitation, normal objective evaluation.",
+    action: "Keep low until higher-risk branches are clarified.",
+    pending: [],
+  },
 ];
 
 const evidenceLabels = ["Exertional dyspnea", "Blood loss", "Endocrine signs", "Fever/cough"];
@@ -85,6 +230,9 @@ let state = {
   activeDiseaseId: "anemia",
   pending: [],
   matrix: false,
+  symptoms: [],
+  heatmapSearch: "",
+  questionComplete: false,
 };
 
 const qaPanel = document.getElementById("qaPanel");
@@ -107,6 +255,11 @@ const engineState = document.getElementById("engineState");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const modalBody = document.getElementById("modalBody");
+const symptomForm = document.getElementById("symptomForm");
+const symptomInput = document.getElementById("symptomInput");
+const symptomChips = document.getElementById("symptomChips");
+const symptomCount = document.getElementById("symptomCount");
+const heatmapSearch = document.getElementById("heatmapSearch");
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -123,12 +276,123 @@ function tierLabel(tier) {
 }
 
 function answerLabel(answer) {
+  if (answer === "symptom") return "Added symptom";
   if (answer === "yes") return "Yes";
   if (answer === "no") return "No";
   return "Not sure";
 }
 
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+}
+
+function symptomWeights(symptom) {
+  const text = symptom.toLowerCase();
+  const weights = {};
+  const add = (id, value) => {
+    weights[id] = (weights[id] || 0) + value;
+  };
+
+  if (/chest|pleuritic|pain|pressure|tight/.test(text)) {
+    add("pulmonaryEmbolism", 18);
+    add("heartFailure", 8);
+    add("anxiety", 6);
+  }
+  if (/wheez|asthma|trigger|inhaler/.test(text)) {
+    add("asthma", 28);
+    add("infection", 5);
+  }
+  if (/cough|fever|chill|sputum|congestion/.test(text)) {
+    add("infection", 18);
+    add("asthma", 6);
+    add("pulmonaryEmbolism", 4);
+  }
+  if (/palpitation|heart racing|syncope|faint/.test(text)) {
+    add("arrhythmia", 20);
+    add("thyroid", 8);
+    add("anxiety", 7);
+  }
+  if (/heavy|bleed|period|menstrual|blood/.test(text)) {
+    add("anemia", 20);
+    add("pregnancy", 5);
+  }
+  if (/weight|tremor|heat|sweat/.test(text)) {
+    add("thyroid", 18);
+    add("diabetes", 5);
+  }
+  if (/snor|sleep|morning headache|daytime/.test(text)) {
+    add("sleepApnea", 18);
+    add("depression", 5);
+  }
+  if (/numb|tingl|gait|balance/.test(text)) {
+    add("vitaminB12", 19);
+  }
+  if (/edema|swelling|orthopnea|pillow/.test(text)) {
+    add("heartFailure", 20);
+    add("renal", 9);
+  }
+  if (/urinat|thirst|hungry|glucose/.test(text)) {
+    add("diabetes", 18);
+    add("renal", 5);
+  }
+  if (/joint|rash|stiff|inflamm/.test(text)) {
+    add("autoimmune", 18);
+  }
+  if (/medicine|medication|supplement|dose/.test(text)) {
+    add("medication", 18);
+  }
+  if (!Object.keys(weights).length) {
+    add("anemia", 4);
+    add("thyroid", 4);
+    add("depression", 4);
+  }
+
+  return weights;
+}
+
+function addSymptomQuestion(symptom) {
+  const weights = symptomWeights(symptom);
+  questions.push({
+    text: `Is "${symptom}" new, worsening, or clearly linked to the main complaint?`,
+    purpose: "Clarify added symptom",
+    rationale: "Added symptoms are treated as coded intake events first, then clarified with a targeted follow-up question.",
+    weights,
+    symptom,
+  });
+  state.currentQuestion = questions.length - 1;
+  state.questionComplete = false;
+}
+
+function addSymptom(symptom) {
+  const cleanSymptom = symptom.trim().replace(/\s+/g, " ");
+  if (!cleanSymptom) return;
+
+  const weights = symptomWeights(cleanSymptom);
+  state.symptoms.push(cleanSymptom);
+  state.answers.push({
+    question: cleanSymptom,
+    answer: "symptom",
+    purpose: "Patient-reported symptom",
+  });
+
+  state.diseases = state.diseases
+    .map((disease) => {
+      const delta = Math.round((weights[disease.id] || 0) * 0.65);
+      const score = clamp(disease.score + delta, 4, 96);
+      const climb = clamp(disease.climb + Math.max(0, Math.round(delta / 3)), 8, 38);
+      return { ...disease, score, climb, tier: tierFor(score) };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  addSymptomQuestion(cleanSymptom);
+  state.activeDiseaseId = state.diseases[0].id;
+  symptomInput.value = "";
+  render();
+}
+
 function applyAnswer(answer) {
+  if (state.questionComplete) return;
+
   const question = questions[state.currentQuestion];
   const multiplier = answer === "yes" ? 1 : answer === "no" ? -0.72 : 0.24;
   state.answers.push({ question: question.text, answer, purpose: question.purpose });
@@ -142,7 +406,11 @@ function applyAnswer(answer) {
     })
     .sort((a, b) => b.score - a.score);
 
-  state.currentQuestion = Math.min(state.currentQuestion + 1, questions.length - 1);
+  if (state.currentQuestion >= questions.length - 1) {
+    state.questionComplete = true;
+  } else {
+    state.currentQuestion += 1;
+  }
 
   const promoted = state.diseases.filter((disease) => disease.tier === "active");
   promoted.forEach((disease) => {
@@ -162,6 +430,7 @@ function applyAnswer(answer) {
 }
 
 function resetState() {
+  questions = structuredClone(baseQuestions);
   state = {
     currentQuestion: 0,
     answers: [],
@@ -169,29 +438,66 @@ function resetState() {
     activeDiseaseId: "anemia",
     pending: [],
     matrix: false,
+    symptoms: [],
+    heatmapSearch: "",
+    questionComplete: false,
   };
+  heatmapSearch.value = "";
   render();
 }
 
 function renderQuestion() {
   const question = questions[state.currentQuestion];
-  questionCounter.textContent = `Question ${state.currentQuestion + 1} of ${questions.length}`;
-  questionPurpose.textContent = question.purpose;
-  questionText.textContent = question.text;
-  questionRationale.textContent = question.rationale;
+  const answerButtons = document.querySelectorAll(".answer-button");
+
+  if (state.questionComplete) {
+    questionCounter.textContent = `${questions.length} of ${questions.length} answered`;
+    questionPurpose.textContent = "No active follow-up";
+    questionText.textContent = "No remaining questions for the current case state.";
+    questionRationale.textContent = "Add a new symptom below to generate a targeted follow-up question.";
+    answerButtons.forEach((button) => {
+      button.disabled = true;
+      button.setAttribute("aria-disabled", "true");
+    });
+  } else {
+    questionCounter.textContent = `Question ${state.currentQuestion + 1} of ${questions.length}`;
+    questionPurpose.textContent = question.purpose;
+    questionText.textContent = question.text;
+    questionRationale.textContent = question.rationale;
+    answerButtons.forEach((button) => {
+      button.disabled = false;
+      button.removeAttribute("aria-disabled");
+    });
+  }
 
   answerLog.innerHTML = state.answers.length
     ? state.answers
         .map(
           (item) =>
-            `<li><strong>${answerLabel(item.answer)}</strong> — ${item.purpose}<br><span>${item.question}</span></li>`,
+            `<li><strong>${answerLabel(item.answer)}</strong> — ${item.purpose}<br><span>${escapeHtml(item.question)}</span></li>`,
         )
         .join("")
     : "<li>No coded answers selected yet.</li>";
+
+  symptomCount.textContent = `${state.symptoms.length} added`;
+  symptomChips.innerHTML = state.symptoms.length
+    ? state.symptoms.map((symptom) => `<span class="symptom-chip">${escapeHtml(symptom)}</span>`).join("")
+    : "";
 }
 
 function renderDiseases() {
-  diseaseList.innerHTML = state.diseases
+  const query = state.heatmapSearch.trim().toLowerCase();
+  const visibleDiseases = query
+    ? state.diseases.filter((disease) =>
+        [disease.name, disease.summary, disease.path, disease.action, tierLabel(disease.tier), ...disease.pending]
+          .join(" ")
+          .toLowerCase()
+          .includes(query),
+      )
+    : state.diseases;
+
+  diseaseList.innerHTML = visibleDiseases.length
+    ? visibleDiseases
     .map(
       (disease) => `
         <article class="disease-row ${disease.id === state.activeDiseaseId ? "active" : ""}" data-disease-id="${disease.id}" tabindex="0">
@@ -211,31 +517,69 @@ function renderDiseases() {
         </article>
       `,
     )
-    .join("");
+    .join("")
+    : `<div class="heatmap-empty">
+        <div>
+          <strong>No matching differential rows</strong>
+          <span>Try a disease, symptom, status, or workup term.</span>
+        </div>
+      </div>`;
 
-  const activeDisease = state.diseases.find((disease) => disease.id === state.activeDiseaseId) || state.diseases[0];
+  const activeDisease =
+    visibleDiseases.find((disease) => disease.id === state.activeDiseaseId) ||
+    visibleDiseases[0] ||
+    state.diseases.find((disease) => disease.id === state.activeDiseaseId) ||
+    state.diseases[0];
   pathTitle.textContent = activeDisease.name;
-  pathCopy.textContent = activeDisease.path;
+  pathCopy.textContent = visibleDiseases.length
+    ? activeDisease.path
+    : `No path preview is available for "${state.heatmapSearch}". Clear the search to return to the ranked differential.`;
 
   const promotedCount = state.diseases.filter((disease) => disease.tier === "active").length;
-  engineState.textContent = state.answers.length
+  engineState.textContent = query
+    ? `${visibleDiseases.length} of ${state.diseases.length} differential row${visibleDiseases.length === 1 ? "" : "s"} match "${state.heatmapSearch}".`
+    : state.answers.length
     ? `Updated from ${state.answers.length} coded answer${state.answers.length === 1 ? "" : "s"}; surfaces retained their layout.`
     : "Initial state: ranked from intake findings.";
   threadCount.textContent = `${promotedCount} active`;
 }
 
 function renderMatrix() {
-  const headers = ["Evidence", ...state.diseases.map((disease) => disease.name.split(" ")[0])];
+  const query = state.heatmapSearch.trim().toLowerCase();
+  const visibleDiseases = query
+    ? state.diseases.filter((disease) =>
+        [disease.name, disease.summary, disease.path, disease.action, tierLabel(disease.tier), ...disease.pending]
+          .join(" ")
+          .toLowerCase()
+          .includes(query),
+      )
+    : state.diseases;
+
+  if (!visibleDiseases.length) {
+    matrixView.innerHTML = `<div class="heatmap-empty">
+      <div>
+        <strong>No matching matrix columns</strong>
+        <span>Clear the search to return to the full matrix.</span>
+      </div>
+    </div>`;
+    matrixView.style.setProperty("--matrix-columns", 1);
+    matrixView.classList.toggle("hidden", !state.matrix);
+    diseaseList.classList.toggle("hidden", state.matrix);
+    return;
+  }
+
+  const headers = ["Evidence", ...visibleDiseases.map((disease) => disease.name.split(" ")[0])];
   const cells = headers.map((label) => `<div class="matrix-cell header">${label}</div>`);
   evidenceLabels.forEach((evidence, rowIndex) => {
     cells.push(`<div class="matrix-cell header">${evidence}</div>`);
-    state.diseases.forEach((disease) => {
+    visibleDiseases.forEach((disease) => {
       const value = Math.abs((questions[rowIndex]?.weights[disease.id] || 0) * 4);
       const signal = value > 48 ? "signal-high" : value > 20 ? "signal-mid" : "signal-low";
       cells.push(`<div class="matrix-cell ${signal}">${value > 48 ? "Strong" : value > 20 ? "Moderate" : "Low"}</div>`);
     });
   });
   matrixView.innerHTML = cells.join("");
+  matrixView.style.setProperty("--matrix-columns", visibleDiseases.length);
   matrixView.classList.toggle("hidden", !state.matrix);
   diseaseList.classList.toggle("hidden", state.matrix);
 }
@@ -299,7 +643,18 @@ document.querySelectorAll(".answer-button").forEach((button) => {
   button.addEventListener("click", () => applyAnswer(button.dataset.answer));
 });
 
+symptomForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  addSymptom(symptomInput.value);
+});
+
 document.getElementById("resetButton").addEventListener("click", resetState);
+
+heatmapSearch.addEventListener("input", () => {
+  state.heatmapSearch = heatmapSearch.value;
+  renderDiseases();
+  renderMatrix();
+});
 
 document.getElementById("contextToggle").addEventListener("click", () => {
   const context = document.getElementById("caseContext");
